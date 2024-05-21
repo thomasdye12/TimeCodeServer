@@ -36,8 +36,9 @@ npm install
 Run the server with:
 
 ```bash
-npm start
+node index.js
 ```
+then connect to the server using your network midi at IP:5006
 
 
 
@@ -57,5 +58,3 @@ TimeCodeServer is open-source software licensed under the MIT license.---
 
 <!-- i want to add some images -->
 
-## Screenshots
-![Screenshot 1](
