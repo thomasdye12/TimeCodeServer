@@ -1,0 +1,47 @@
+{
+  "name": "rtpmidi",
+  "version": "1.0.0",
+  "author": "Jascha Dachtera <jascha.dachtera@gmail.com>",
+  "description": "A node js implementation of Apples Network Midi Protocol.",
+  "main": "./index.js",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/jdachtera/node-rtpmidi.git"
+  },
+  "dependencies": {
+    "csv-parse": "^5.5.5",
+    "express": "^4.19.2",
+    "fs": "^0.0.1-security",
+    "midi-common": "*",
+    "multer": "^1.4.5-lts.1",
+    "node": "^22.1.0",
+    "rtpmidi": "^1.0.0",
+    "socket.io": "^4.7.5",
+    "strip-bom-stream": "^5.0.0",
+    "winston": "^3.2.1",
+    "ws": "^8.17.0"
+  },
+  "optionalDependencies": {
+    "avahi_pub": "TheThingSystem/node_avahi_pub",
+    "mdns": "2.3.3"
+  },
+  "keywords": [
+    "midi",
+    "rtpmidi",
+    "coremidi",
+    "network",
+    "music"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.3"
+  },
+  "scripts": {
+    "lint": "eslint src/"
+  }
+}

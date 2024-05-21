@@ -1,0 +1,6 @@
+# ignore my data dir 
+/data
+/uploads
+# ignore my timecode_stops.log logs 
+timecode_stops.log
+/node_modules

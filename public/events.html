@@ -1,0 +1,115 @@
+<!-- public/events.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Events</title>
+    <style>
+        .event {
+            margin: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+        .h2 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #title {
+            display: grid;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px;
+            justify-content: space-around;
+        }
+
+        .event:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .event:nth-child(odd) {
+            background-color: #efefef;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="title"></div>
+    <div id="eventsContainer"></div>
+    <script src="/js/socket.js"></script>
+    <script>
+        // listen for cusotm event
+        document.addEventListener('Events_Websocket_Message', function (e) {
+            // console.log('Events_Websocket_Message', e.detail);
+            const message = e.detail;
+
+            if (message.event === "csv_data") {
+                // console.log('New CSV data:', message.data);
+                highlightUpcomingEvent(message.data.TimeCode);
+            }
+        });
+        const eventsContainer = document.getElementById('eventsContainer');
+
+        fetch('/api/csvdatafull')
+            .then(response => response.json())
+            .then(data => {
+                displaytitle(data.title);
+                displayEvents(data.events);
+            });
+
+        function displaytitle(title) {
+        //    add a title to the page
+            document.getElementById('title').innerText = title;
+        }
+
+        function displayEvents(events) {
+            eventsContainer.innerHTML = events.map(event => `
+            <div class="event" data-timecode="${event.TimeCode}">
+                <h2 class="h2">${event.name}</h2>
+                <p>Time: ${event.TimeCode}</p>
+            </div>
+        `).join('');
+        }
+
+        function highlightUpcomingEvent(timecode) {
+            // const events = document.querySelectorAll('.event');
+            // const now = new Date(); // Assuming TimeCode is comparable to Date
+
+            // let closestEvent = null;
+            // let closestTimeDiff = Infinity;
+
+            // events.forEach(event => {
+            //     const eventTime = new Date(event.dataset.timecode);
+            //     const timeDiff = eventTime - now;
+
+            //     if (timeDiff >= 0 && timeDiff < closestTimeDiff) {
+            //         closestTimeDiff = timeDiff;
+            //         closestEvent = event;
+            //     }
+            // });
+
+            // if (closestEvent) {
+            //     closestEvent.style.backgroundColor = 'green';
+            //     closestEvent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // }
+            // hightlight the event with the exact timecode as the timecode passed in, make sure to remove the highlight from the previous event
+            const events = document.querySelectorAll('.event');
+            events.forEach(event => {
+                if (event.dataset.timecode === timecode) {
+                    event.style.backgroundColor = 'green';
+                    event.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    event.style.backgroundColor = '';
+                }
+            });
+
+        }
+
+
+    </script>
+
+</body>
+
+</html>
