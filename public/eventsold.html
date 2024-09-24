@@ -48,10 +48,6 @@
     <div id="eventsContainer"></div>
     <script src="/js/socket.js"></script>
     <script>
-        //  whne the page loads make a request to /api/csvdataplaying to get the current playing event
-        
-
-
              // only show full screen button when not in full screen
              document.addEventListener('fullscreenchange', (event) => {
             if (document.fullscreenElement) {
@@ -69,7 +65,7 @@
 
             if (message.event === "csv_data") {
                 // console.log('New CSV data:', message.data);
-                highlightUpcomingEvent(message.data.TimeCode,0);
+                highlightUpcomingEvent(message.data.TimeCode);
             }
             if (message.event === "timecode") {
                     // Update timecode and track information
@@ -80,10 +76,6 @@
                     }
 
                 } 
-                if (message.event === "timecode_stop") {
-                    // console.log('New CSV data:', message.data);
-                    highlightUpcomingEvent(message.data.CSV.TimeCode,2);
-                }
         });
         const eventsContainer = document.getElementById('eventsContainer');
 
@@ -92,14 +84,11 @@
             .then(data => {
                 displaytitle(data.title);
                 displayEvents(data.events);
-                getcurrentplaying();
             });
 
         function displaytitle(title) {
         //    add a title to the page
-        // set page header title to the title, for the tab title
             document.getElementById('title').innerText = title;
-            document.title = title;
         }
 
         function displayEvents(events) {
@@ -113,17 +102,7 @@
         `).join('');
         }
 
-        function getcurrentplaying() {
-            // /api/csvdataplaying
-            fetch('/api/csvdataplaying')
-            .then(response => response.json())
-            .then(data => {
-                highlightUpcomingEvent(data.TimeCode,1);
-            });
-            
-        }
-
-        function highlightUpcomingEvent(timecode,code) {
+        function highlightUpcomingEvent(timecode) {
             // const events = document.querySelectorAll('.event');
             // const now = new Date(); // Assuming TimeCode is comparable to Date
 
@@ -148,7 +127,7 @@
             const events = document.querySelectorAll('.event');
             events.forEach(event => {
                 if (event.dataset.timecode === timecode) {
-                    event.style.backgroundColor = GetColourByCode(code);
+                    event.style.backgroundColor = 'green';
                     event.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     // set an id on the event so that the time can be put on it 
                     event.id = 'highlighted';
@@ -158,20 +137,6 @@
                 }
             });
 
-        }
-
-        // neeed a function to change the color based on a code 0 = green, 1 = amber, 2 = red
-        function  GetColourByCode(code) {
-            switch (code) {
-                case 0:
-                    return 'green';
-                case 1:
-                    return 'orange';
-                case 2:
-                    return 'red';
-                default:
-                    return 'black';
-            }
         }
 
 

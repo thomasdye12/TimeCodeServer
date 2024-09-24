@@ -61,12 +61,15 @@ function timecodeToMinutes(timecode) {
     // return parseInt(hours) * 60 + parseInt(minutes);
     return parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds) + parseInt(frames) / 30;
 }
-function ParseCSVupload(title, filepath) {
+function ParseCSVupload(title, filepath, loadWithoutRorder = false) {
     var records = [];
     fs.createReadStream(filepath)
         .pipe(csv.parse({ columns: true, trim: true }))
         .on('data', (row) => {
-            records.push(row);
+            // only add the row if the Rorder key is present and has a value or if the loadWithoutRorder is set to true
+            if (row.Rorder || loadWithoutRorder) {
+                records.push(row);
+            }
         })
         .on('end', () => {
             console.log('CSV file successfully processed');

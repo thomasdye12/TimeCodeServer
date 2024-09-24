@@ -63,6 +63,7 @@ mtc.on('change', () => {
 
     if (currentTimeInMinutes >= csvData[i].startTime && currentTimeInMinutes < csvData[i].endTime) {
       CSVDataPlaying = csvData[i];
+      // add an is playing key, to the CSVDataPlaying object
       if (lastSentCsvData !== CSVDataPlaying) {
 
         sendData("csv_data", CSVDataPlaying);
@@ -78,6 +79,10 @@ mtc.on('change', () => {
   sendData("timecode", { time: smtpeString, CSV: CSVDataPlaying });
 });
 
+// add an api endpoitn to show the  CSVDataPlaying 
+app.get('/api/csvdataplaying', (req, res) => {
+  res.json(CSVDataPlaying);
+});
 
 
 // session.connect({ address: '127.0.0.1', port: 5004 });

@@ -10,10 +10,12 @@ const upload = multer({ dest: 'uploads/' }); // Files will temporarily be saved 
 
 // Route to handle the form submission
 router.post('/upload-csv', upload.single('csvfile'), async (req, res) => {
-    const { title } = req.body; // Get the title from the form
+    const { title, loadWithoutRorder} = req.body; // Get the title from the form
     const file = req.file; // Get the uploaded file
+    // new value loadWithoutRorder that will be sent from the web page
 
-    csvDataManager.ParseCSVupload(title, file.path); // Parse the CSV file
+
+    csvDataManager.ParseCSVupload(title, file.path,loadWithoutRorder); // Parse the CSV file
     res.send('File uploaded successfully');
 });
 

@@ -21,9 +21,8 @@ router.get('/api/ips', (req, res) => {
 
 // Define the '/ReloadCSV' endpoint
 router.get('/ReloadCSV', (req, res) => {
-    csvDataManager.setCsvData = [];
-  loadCSVData('/var/TimeCodeServer/Show Numbers-Light V.csv');  // Ensure loadCSVData is accessible
-  res.send('CSV data reloaded');
+  csvDataManager.FirstLoad();
+  res.json({ status: 'success' });
 });
 
 // Define the '/history' endpoint
