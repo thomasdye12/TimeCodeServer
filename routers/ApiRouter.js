@@ -80,4 +80,23 @@ router.get('/api/csvdata', (req, res) => {
   }
   );
 
+// Define the '/api/updateEvent/:timeCode' endpoint to update an event
+router.post('/api/saveEvents', (req, res) => {
+  const updatedEvent = req.body; // The updated event sent from the frontend
+
+  // Update the event in the CSV data
+  const success = csvDataManager.CreateEventsbyJSON(updatedEvent);
+
+  if (success) {
+    res.json({ status: 'success', message: `Events updated successfully` });
+  } else {
+    res.status(404).json({ status: 'error', message: `Failed to save events` });
+  }
+});
+
+
+
+
+
+
 module.exports = router;

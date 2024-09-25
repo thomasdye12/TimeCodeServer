@@ -11,11 +11,13 @@ app.use(express.static('public'));
 // Routers
 const apiRoutes = require('./routers/ApiRouter');
 const uploadRoutes = require('./routers/Uploader');
+app.use(express.json());
 app.use(apiRoutes);
 app.use(uploadRoutes);
 
 // WebSocket Router
 const { sendData } = require('./routers/websocketRouter')(server);
+csvDataManager.SendDataFunction = sendData;
 
 // MIDI Router
 const { session, mtc } = require('./routers/midiRouter')();

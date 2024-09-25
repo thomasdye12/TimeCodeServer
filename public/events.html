@@ -13,15 +13,18 @@
             color: white;
             font-family: Arial, sans-serif;
         }
+
         .event {
             margin: 10px;
             padding: 1px;
             border: 0.2px solid #000000;
         }
+
         .h2 {
             font-size: 20px;
             font-weight: bold;
         }
+
         #title {
             display: grid;
             align-items: center;
@@ -42,18 +45,18 @@
 </head>
 
 <body>
-    
+
     <div id="title"></div>
     <button onclick="document.documentElement.requestFullscreen()">Full Screen</button>
     <div id="eventsContainer"></div>
     <script src="/js/socket.js"></script>
     <script>
         //  whne the page loads make a request to /api/csvdataplaying to get the current playing event
-        
 
 
-             // only show full screen button when not in full screen
-             document.addEventListener('fullscreenchange', (event) => {
+
+        // only show full screen button when not in full screen
+        document.addEventListener('fullscreenchange', (event) => {
             if (document.fullscreenElement) {
                 // console.log(`Element: ${document.fullscreenElement.id} entered full-screen mode.`);
                 document.querySelector('button').style.display = 'none';
@@ -69,21 +72,27 @@
 
             if (message.event === "csv_data") {
                 // console.log('New CSV data:', message.data);
-                highlightUpcomingEvent(message.data.TimeCode,0);
+                highlightUpcomingEvent(message.data.TimeCode, 0);
             }
             if (message.event === "timecode") {
-                    // Update timecode and track information
-                  // on the highlighted event set the <p>TIME to the timecode
-                    const highlighted = document.getElementById('highlighted');
-                    if (highlighted) {
-                        highlighted.querySelector('p').innerText = `Time: ${message.data.time}`;
-                    }
-
-                } 
-                if (message.event === "timecode_stop") {
-                    // console.log('New CSV data:', message.data);
-                    highlightUpcomingEvent(message.data.CSV.TimeCode,2);
+                // Update timecode and track information
+                // on the highlighted event set the <p>TIME to the timecode
+                const highlighted = document.getElementById('highlighted');
+                if (highlighted) {
+                    highlighted.querySelector('p').innerText = `Time: ${message.data.time}`;
                 }
+
+            }
+            if (message.event === "timecode_stop") {
+                // console.log('New CSV data:', message.data);
+                highlightUpcomingEvent(message.data.CSV.TimeCode, 2);
+            }
+            if (message.event === "updateList") {
+                console.log('New CSV data:', message.data);
+                displaytitle(message.data.title);
+                displayEvents(message.data.events);
+                getcurrentplaying();
+            }
         });
         const eventsContainer = document.getElementById('eventsContainer');
 
@@ -96,15 +105,15 @@
             });
 
         function displaytitle(title) {
-        //    add a title to the page
-        // set page header title to the title, for the tab title
+            //    add a title to the page
+            // set page header title to the title, for the tab title
             document.getElementById('title').innerText = title;
             document.title = title;
         }
 
         function displayEvents(events) {
             //  sort the events by the ROrder
-            
+
             eventsContainer.innerHTML = events.map(event => `
             <div class="event" data-timecode="${event.TimeCode}">
                 <h2 class="h2">${event.name}</h2>
@@ -116,14 +125,14 @@
         function getcurrentplaying() {
             // /api/csvdataplaying
             fetch('/api/csvdataplaying')
-            .then(response => response.json())
-            .then(data => {
-                highlightUpcomingEvent(data.TimeCode,1);
-            });
-            
+                .then(response => response.json())
+                .then(data => {
+                    highlightUpcomingEvent(data.TimeCode, 1);
+                });
+
         }
 
-        function highlightUpcomingEvent(timecode,code) {
+        function highlightUpcomingEvent(timecode, code) {
             // const events = document.querySelectorAll('.event');
             // const now = new Date(); // Assuming TimeCode is comparable to Date
 
@@ -161,7 +170,7 @@
         }
 
         // neeed a function to change the color based on a code 0 = green, 1 = amber, 2 = red
-        function  GetColourByCode(code) {
+        function GetColourByCode(code) {
             switch (code) {
                 case 0:
                     return 'green';

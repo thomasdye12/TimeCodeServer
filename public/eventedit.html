@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Events</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .event {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid white;
+            position: relative;
+        }
+
+        .h2 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        #title {
+            display: grid;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px;
+            justify-content: space-around;
+        }
+
+        .event:nth-child(even) {
+            background-color: #070707;
+        }
+
+        .event:nth-child(odd) {
+            background-color: #000000;
+        }
+
+        .arrow-container {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .arrow {
+            cursor: pointer;
+            font-size: 20px;
+            color: white;
+            margin: 5px 0;
+        }
+
+        .edit-container {
+            margin-top: 10px;
+        }
+
+        .edit-input {
+            width: 100%;
+            margin-bottom: 5px;
+            padding: 5px;
+        }
+
+        .save-button {
+            margin: 20px;
+            padding: 10px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .add-event-button {
+            margin: 20px;
+            padding: 10px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="title"></div>
+    <button class="save-button" onclick="saveAll()">SAVE</button>
+    <div id="eventsContainer"></div>
+
+    <button class="add-event-button" onclick="addNewEvent()">Add New Event</button>
+    <button class="save-button" onclick="saveAll()">SAVE</button>
+
+    <script>
+        const eventsContainer = document.getElementById('eventsContainer');
+        let eventsData = [];
+        let title = '';
+
+        // Fetch the initial data from the server
+        fetch('/api/csvdatafull')
+            .then(response => response.json())
+            .then(data => {
+                eventsData = data.events;
+                title = data.title;
+                displayTitle(title);
+                displayEvents(eventsData);
+            });
+
+        // Display the title with an editable field
+        function displayTitle(currentTitle) {
+            document.getElementById('title').innerHTML = `
+                <label>Title:</label>
+                <input class="edit-input" type="text" value="${currentTitle}" oninput="editTitle(this.value)">
+            `;
+        }
+
+        function editTitle(newTitle) {
+            title = newTitle;
+        }
+
+        // Display all events
+        function displayEvents(events) {
+            eventsContainer.innerHTML = events.map((event, index) => `
+            <div class="event" data-timecode="${event.TimeCode}">
+                <h2 class="h2">
+                    <input class="edit-input" type="text" value="${event.name}" oninput="editEvent('${event.TimeCode}', 'name', this.value)">
+                </h2>
+                <label>TimeCode:</label>
+                <input class="edit-input" type="text" value="${event.TimeCode}" oninput="editEvent('${event.TimeCode}', 'TimeCode', this.value)">
+                <label>Class:</label>
+                <input class="edit-input" type="text" value="${event.class}" oninput="editEvent('${event.TimeCode}', 'class', this.value)">
+                <label>Choreographer:</label>
+                <input class="edit-input" type="text" value="${event.Choreographer}" oninput="editEvent('${event.TimeCode}', 'Choreographer', this.value)">
+                <label>Type:</label>
+                <input class="edit-input" type="text" value="${event.Type}" oninput="editEvent('${event.TimeCode}', 'Type', this.value)">
+                <label>Program Time:</label>
+                <input class="edit-input" type="text" value="${event['Program Time'] || ''}" oninput="editEvent('${event.TimeCode}', 'Program Time', this.value)">
+                
+                <div class="arrow-container">
+                    <span class="arrow" onclick="moveEvent(${index}, -1)">⬆️</span>
+                    <span class="arrow" onclick="moveEvent(${index}, 1)">⬇️</span>
+                </div>
+            </div>
+            `).join('');
+        }
+
+        function editEvent(timeCode, key, value) {
+            // Find the event by TimeCode and update the specified field
+            const event = eventsData.find(event => event.TimeCode === timeCode);
+            if (event) {
+                event[key] = value;
+            }
+        }
+
+        function moveEvent(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= eventsData.length) return; // Out of bounds
+
+            // Swap events in the array
+            [eventsData[index], eventsData[newIndex]] = [eventsData[newIndex], eventsData[index]];
+            displayEvents(eventsData); // Re-render the events
+        }
+
+        function addNewEvent() {
+            // Add a new blank event
+            const newEvent = {
+                TimeCode: '00:00:00:00',  // Default placeholder
+                name: 'New Event',
+                class: '',
+                Choreographer: '',
+                Type: '',
+                'Program Time': ''
+            };
+            eventsData.push(newEvent);  // Add to events list
+            displayEvents(eventsData);  // Re-render
+        }
+
+        function saveAll() {
+            const updatedData = {
+                title: title,
+                events: eventsData
+            };
+
+            // Send the updated data back to the server
+            fetch('/api/saveEvents', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Data saved successfully:', data);
+                alert('Data saved successfully!');
+            })
+            .catch(error => {
+                console.error('Error saving data:', error);
+                alert('Error saving data.');
+            });
+        }
+    </script>
+
+</body>
+
+</html>
