@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Timecode Stream</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #timecodeBox {
+            /* font-size: 1000%; */
+            padding: 20px;
+            background-color: #303030;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #FFFFFF;
+        }
+
+        #timecode {
+            font-size: 1000%;
+            color: #FFFFFF;
+        }
+
+        #track {
+            font-size: 20px;
+            color: #FFFFFF;
+            /* center */
+            text-align: center;
+        }
+
+        #ips {
+            font-size: 10px;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #FFFFFF;
+        }
+
+        #history {
+            width: 95%;
+            max-height: 700px;
+            overflow-y: auto;
+            background: #282828;
+            border: 1px solid #ccc;
+            padding: 10px;
+            color: #FFFFFF;
+        }
+
+        .history-item {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="timecodeBox">
+
+        <div id="timecode">Loading...</div>
+        <!-- add new line for info about track -->
+        <div id="track">Track Info: Loading...</div>
+    </div>
+    <div id="history"></div>
+    <div id="ips">Server IPs: Loading...</div>
+    <!-- load socket.js -->
+    <script src="/js/socket.js"></script>
+    <script>
+        // listen for cusotm event
+        document.addEventListener('Events_Websocket_Message', function (e) {
+            // console.log('Events_Websocket_Message', e.detail);
+            const message = e.detail;
+            if (message.event === "timecode") {
+                    // Update timecode and track information
+                    document.getElementById('timecode').textContent = message.data.time;
+                    document.getElementById('track').textContent = `${message.data.CSV.class} - ${message.data.CSV.Choreographer} - ${message.data.CSV.Type} - ${message.data.CSV["Lighting State"]} - ${message.data.CSV.Costume} - ${message.data.CSV.TimeCode}`;
+                } else if (message.event === "timecode_stop") {
+                    // Handle a 'timecode_stop' event
+                    const historyDiv = document.getElementById('history');
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.textContent = `New Stop: ${message.data.CSV.class} - ${message.data.CSV.Choreographer} - ${message.data.CSV.Type} - ${message.data.CSV["Lighting State"]} - ${message.data.CSV.Costume} - ${message.data.CSV.TimeCode} at ${new Date(message.data.unixTimestamp).toLocaleString()}`;
+
+                    // Insert the new entry at the top of the history list
+                    historyDiv.insertBefore(div, historyDiv.firstChild);
+                }
+        });
+
+
+        function fetchHistory() {
+            fetch('/history')
+                .then(response => response.json())
+                .then(data => {
+                    const historyDiv = document.getElementById('history');
+                    historyDiv.innerHTML = '';
+                    // Reverse the data array so the most recent entries are at the top
+                    data.reverse().forEach((entry, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'history-item';
+                        // div.textContent = `Stop ${index + 1}: ${entry.timecode} at ${new Date(entry.unixTimestamp).toLocaleString()}`;
+                        // add the new class and stuff
+                        div.textContent = `Stop ${index + 1}: ${entry.CSV.class} - ${entry.CSV.Choreographer} - ${entry.CSV.Type} - ${entry.CSV["Lighting State"]} - ${entry.CSV.Cosutme} - ${entry.CSV.TimeCode} at ${new Date(entry.unixTimestamp).toLocaleString()}`;
+                        historyDiv.appendChild(div);
+                    });
+                });
+        }
+
+        function fetchIPs() {
+            fetch('/api/ips')
+                .then(response => response.json())
+                .then(ips => {
+                    document.getElementById('ips').textContent = 'Server IPs: ' + ips.join(':3000, ');
+                });
+        }
+
+
+        document.addEventListener('Events_Websocket_Connected', function () {
+
+
+            fetchHistory();
+            fetchIPs();
+
+        });
+
+
+    </script>
+</body>
+
+</html>

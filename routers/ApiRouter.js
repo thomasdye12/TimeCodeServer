@@ -4,6 +4,7 @@ const router = express.Router();
 const csvDataManager = require('./csvDataManager');
 const fs = require('fs');
 const readline = require('readline');
+const path = require('path');
 
 // Define the '/api/ips' endpoint
 router.get('/api/ips', (req, res) => {
@@ -66,19 +67,32 @@ router.get('/api/csvdata', (req, res) => {
       res.end();
     });
   });
+  const publicFolderPath = path.join(__dirname, '../public');
   // /end  to give a list of endpoints
   router.get('/end', (req, res) => {
-// dynamically generate the list of endpoints,making them links that work 
     const endpoints = [];
     const routes = router.stack;
+
+    // Generate list of route endpoints
     routes.forEach(route => {
-      if (route.route && route.route.path) {
-        endpoints.push(`<a href="${route.route.path}">${route.route.path}</a>`);
-      }
+        if (route.route && route.route.path) {
+            endpoints.push(`<a href="${route.route.path}">${route.route.path}</a>`);
+        }
     });
+
+    // Include files from the 'public' folder
+    try {
+        const publicFiles = fs.readdirSync(publicFolderPath);
+        publicFiles.forEach(file => {
+            // Assuming public files are directly accessible from '/public/<filename>'
+            endpoints.push(`<a href="/${file}">/${file}</a>`);
+        });
+    } catch (err) {
+        console.error('Error reading public folder:', err);
+    }
+
     res.send(endpoints.join('<br>'));
-  }
-  );
+});
 
 // Define the '/api/updateEvent/:timeCode' endpoint to update an event
 router.post('/api/saveEvents', (req, res) => {
